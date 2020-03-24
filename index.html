@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Monster Slayer</title>
+    <script src="vue.js"></script>
+    <link rel="stylesheet" href="css/foundation.min.css">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+    <div id="app">
+        <section class="row">
+            <div class="small-6 columns">
+                <h1 class="text-center">YOU <img src="https://avatars0.githubusercontent.com/u/32362094?s=460&v=4" alt="" width="100px" height="100px"></h1>
+                <div class="healthbar" :style="{backgroundColor:'green',width:yourScore+'%'}">
+
+                    <div class="healthbar text-center"
+                        style="background-color: green; margin: 0; color: white;width:70%;">
+
+                        <span>{{yourScore}} % </span>
+                    </div>
+                </div>
+            </div>
+            <div class="small-6 columns">
+                <h1 class="text-center">MONSTER <img src="https://m.media-amazon.com/images/I/71sfI1p-9gL._SS500_.jpg" alt="" width="100px" height="100px"></h1>
+                <div class="healthbar" :style="{backgroundColor:'green',width:monStarScore+'%'}">
+                    <div class="healthbar text-center" style="background-color: green; margin: 0; color: white;">
+                        <span>{{monStarScore}} % </span>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="row controls" v-if="startGame">
+            <div class="small-12 columns">
+                <button id="start-game" @click="letsStartGame">START NEW GAME</button>
+            </div>
+        </section>
+        <section class="row controls" v-if="play">
+            <div class="small-12 columns">
+                <button id="attack" @click="attack">ATTACK</button>
+                <button id="special-attack" @click="specialAttack">SPECIAL ATTACK</button>
+                <button id="heal" @click="heal">HEAL</button>
+                <button id="give-up" @click="give_up">GIVE UP</button>
+            </div>
+        </section>
+        <section class="row log">
+            <div class="small-12 columns" style=" height: 564px;
+        overflow: scroll;">
+                <ul v-for="logHistory,index in logHistories">
+                    <li v-if="(index+1) % 2 == 0" style="background-color: cadetblue;">
+                        {{ logHistory }}
+                    </li>
+                    <li v-else style="background-color: chartreuse;">
+                        {{ logHistory }}
+                    </li>
+                </ul>
+            </div>
+        </section>
+        <!-- Math.floor(Math.random() * 10) + 1;  1 to 10-->
+    </div>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                startGame: true,
+                play: false,
+                yourScore: 100,
+                monStarScore: 100,
+                logHistories: [],
+                resMessage: "OH Lost !",
+                yourRandmScore: 0,
+                monstarRandomScore: 0,
+                youAttack: 0,
+                monStarAttack: 0,
+
+            },
+            methods: {
+                letsStartGame() {
+                    this.startGame = false;
+                    this.play = true;
+                    this.logHistories = [];
+
+                },
+                letsTryAgain() {
+                    this.startGame = true;
+                    this.play = false;
+                    this.logHistories = [];
+                    this.yourScore =  100;
+                    this.monStarScore =  100;
+
+                },
+                attack() {
+
+                    //  Attack will be   1 to 5
+                    this.youAttack = Math.floor(Math.random() * 5) + 1;
+                    //  Attack will be   1 to 7
+                    this.monStarAttack = Math.floor(Math.random() * 7) + 1;
+
+                    // Add To Log
+                    this.add_log_history(this.youAttack, this.monStarAttack);
+
+                    // Update Total Score
+                    this.total_score();
+                },
+
+                specialAttack() {
+
+                    //  Attack will be   1 to 15
+                    this.youAttack = Math.floor(Math.random() * 15) + 1;
+                    //  Attack will be   1 to 10
+                    this.monStarAttack = Math.floor(Math.random() * 10) + 1;
+
+                    // Add To Log
+                    this.add_log_history(this.youAttack, this.monStarAttack);
+
+                    // Update Total Score
+                    this.total_score();
+                },
+
+                heal() {
+
+                    // Update Total Score
+                    if (this.yourScore > 0 && this.monStarScore > 0 && this.yourScore < 100 && this.monStarScore < 100) {
+                        var y_heal_sc = Math.floor(Math.random() * 15) + 1;
+                        var m_heal_sc = Math.floor(Math.random() * 10) + 1;
+
+                        this.yourScore = this.yourScore + y_heal_sc;
+                        this.monStarScore = this.monStarScore + m_heal_sc;
+                        // Add To Log
+                        this.logHistories.push("Your Heal  : " + y_heal_sc);
+                        this.logHistories.push("Monstar Heal : " + m_heal_sc);
+                        console.log(this.logHistories);
+                    }
+
+
+
+                },
+
+                add_log_history(yat, mat) {
+                    if (this.yourScore > 0 && this.monStarScore > 0) {
+
+                        this.logHistories.push("Your Lost : " + yat);
+                        this.logHistories.push("Monstar Lost : " + mat);
+                        console.log(this.logHistories);
+                    }
+                },
+                total_score() {
+                    this.check_result();
+
+                    if (this.yourScore > 0 && this.monStarScore > 0) {
+                        this.yourScore = this.yourScore - this.monStarAttack;
+                        this.monStarScore = this.monStarScore - this.youAttack;
+                    }
+
+                },
+                give_up() {
+                  window.alert("Give Up ! You lost It ! Let's start again.");
+                    this.letsTryAgain();
+
+                },
+              victory(name){
+                window.alert(this.resMessage +"! Weldone "+ name);
+                this.letsTryAgain();
+              },
+              check_result(){
+                  if(this.yourScore == 0 || this.yourScore <= 0){
+                      this.victory("Mon Star");
+                  }else if (this.monStarScore == 0 || this.monStarScore <= 0) {
+                    this.victory("YOU ");
+
+                  }
+              }
+
+
+            },
+
+
+
+        });
+    </script>
+</body>
+
+</html>
